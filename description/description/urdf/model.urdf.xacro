@@ -121,6 +121,7 @@
   <xacro:include filename="$(find description)/urdf/model_flashlights.urdf.xacro" />
   <xacro:include filename="$(find description)/urdf/model_speed_cam.urdf.xacro" />
   <xacro:include filename="$(find description)/urdf/model_signal_lights.urdf.xacro" />
+  <xacro:include filename="$(find description)/urdf/model_mavlink.urdf.xacro" />
 
   <!-- Monitors -->
   <xacro:include filename="$(find description)/urdf/model_monitors.urdf.xacro" />
@@ -131,7 +132,6 @@
   <xacro:include filename="$(find description)/urdf/sensor_dock_cam.urdf.xacro" />
   <xacro:include filename="$(find description)/urdf/sensor_haz_cam.urdf.xacro" />
   <xacro:include filename="$(find description)/urdf/sensor_perch_cam.urdf.xacro" />
-
   <!-- PERCHING ARM -->
   <xacro:include filename="$(find description)/urdf/macro_perching_arm.urdf.xacro" />
   <xacro:if value="${pay_top_aft == 'perching_arm'}">
