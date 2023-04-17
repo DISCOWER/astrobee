@@ -25,6 +25,8 @@ endif()
 
 set( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wall -O3 -fPIC" )
 
+set(PX4_SITL_SUPPORT ON)
+
 # Find amend and libraries
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
@@ -43,23 +45,6 @@ find_package(visualization_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 
 
-#   visualization_msgs
-#   tf2
-#   tf2_ros
-#   tf2_eigen
-#   tf2_msgs
-#   gazebo_ros
-#   sensor_msgs
-#   ff_msgs
-#   ff_hw_msgs
-#   tf2_geometry_msgs
-#   ff_util
-#   gnc_autocode
-#   camera
-#   cv_bridge
-#   jsonloader
-# )
-
 # Find packages
 find_package(gazebo_dev REQUIRED)
 find_package(gazebo_ros REQUIRED)
@@ -68,17 +53,56 @@ find_package(gazebo_ros REQUIRED)
 LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../cmake")
 find_package(JsonCpp REQUIRED)
 
+if(PX4_SITL_SUPPORT)
+  find_package(gazebo REQUIRED)
+  link_directories(${GAZEBO_LIBRARY_DIRS})
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GAZEBO_CXX_FLAGS}")
+
+  set(PROTOBUF_IMPORT_DIRS "")
+  foreach(ITR ${GAZEBO_INCLUDE_DIRS})
+    if(ITR MATCHES ".*gazebo-[0-9.]+$")
+      set(PROTOBUF_IMPORT_DIRS "${ITR}/gazebo/msgs/proto")
+    endif()
+  endforeach()
+
+  # PROTOBUF_IMPORT_DIRS has to be set before find_package is called
+  find_package(Protobuf REQUIRED)
+
+  if ("${PROTOBUF_VERSION}" VERSION_LESS "2.5.0")
+    message(FATAL_ERROR "protobuf version: ${PROTOBUF_VERSION} not compatible, must be >= 2.5.0")
+  endif()
+
+  set(GAZEBO_MSG_INCLUDE_DIRS)
+  foreach(ITR ${GAZEBO_INCLUDE_DIRS})
+    if(ITR MATCHES ".*gazebo-[0-9.]+$")
+      set(GAZEBO_MSG_INCLUDE_DIRS "${ITR}/gazebo/msgs")
+    endif()
+  endforeach()
+
+  include_directories(
+    include
+    ${GAZEBO_INCLUDE_DIRS}
+    ${GAZEBO_MSG_INCLUDE_DIRS}
+    ${EIGEN3_INCLUDE_DIRS}
+    ${EIGEN3_INCLUDE_DIRS}/eigen3	# Workaround for Eigen3
+    ${YAML_CPP_INCLUDE_DIR}
+    $ENV{PX4_ROOT}/build/px4_sitl_default/build_gazebo-classic
+    )
+else()
+  include_directories(
+    include
+    ${GAZEBO_INCLUDE_DIRS}
+    ${JSONCPP_INCLUDE_DIRS}
+  )
+endif()
+
 
 ###########
 ## Build ##
 ###########
 
 # Specify additional locations of header files
-include_directories(
-  include
-  ${GAZEBO_INCLUDE_DIRS}
-  ${JSONCPP_INCLUDE_DIRS}
-)
+
 # Add gazebo to the link directorries
 # link_directories(
 #   ${gazebo_dev_LIBRARY_DIRS}
@@ -117,12 +141,16 @@ ament_target_dependencies(gazebo_model_plugin_truth rclcpp tf2 tf2_ros gazebo_de
 ament_export_libraries(gazebo_model_plugin_truth)
 
 # Create a model plugin for the propulsion system
-add_library(gazebo_model_plugin_pmc SHARED
-  src/gazebo_model_plugin_pmc/gazebo_model_plugin_pmc.cc
-)
-target_link_libraries(gazebo_model_plugin_pmc astrobee_gazebo)
-ament_target_dependencies(gazebo_model_plugin_pmc rclcpp ff_msgs ff_hw_msgs gazebo_dev gazebo_ros pmc)
-ament_export_libraries(gazebo_model_plugin_pmc)
+if(NOT PX4_SITL_SUPPORT)
+  add_library(gazebo_model_plugin_pmc SHARED
+    src/gazebo_model_plugin_pmc/gazebo_model_plugin_pmc.cc
+  )
+  target_link_libraries(gazebo_model_plugin_pmc astrobee_gazebo)
+  ament_target_dependencies(gazebo_model_plugin_pmc rclcpp ff_msgs ff_hw_msgs gazebo_dev gazebo_ros pmc)
+  ament_export_libraries(gazebo_model_plugin_pmc)
+else()
+  message("No alternative to PMC for SITL support yet...")
+endif()
 
 # Create a model plugin for the perching arm
 add_library(gazebo_model_plugin_perching_arm SHARED
@@ -165,12 +193,27 @@ ament_target_dependencies(gazebo_model_plugin_signal_lights rclcpp gazebo_dev ga
 ament_export_libraries(gazebo_model_plugin_signal_lights)
 
 # Create a sensor plugin for the IMU
-add_library(gazebo_sensor_plugin_imu SHARED
-   src/gazebo_sensor_plugin_imu/gazebo_sensor_plugin_imu.cc
-)
-target_link_libraries(gazebo_sensor_plugin_imu astrobee_gazebo)
-ament_target_dependencies(gazebo_sensor_plugin_imu rclcpp gazebo_dev gazebo_ros)
-ament_export_libraries(gazebo_sensor_plugin_imu)
+if(PX4_SITL_SUPPORT)
+  # Add PX4_SITL define for publishing ignition messages to PX4 SITL  
+  add_library(gazebo_sensor_plugin_imu SHARED
+    src/gazebo_sensor_plugin_imu/gazebo_sensor_plugin_imu.cc
+  )
+  target_compile_definitions(gazebo_sensor_plugin_imu PRIVATE PX4_SITL=${PX4_SITL_SUPPORT})
+  target_link_libraries(gazebo_sensor_plugin_imu 
+    astrobee_gazebo 
+    $ENV{PX4_ROOT}/build/px4_sitl_default/build_gazebo-classic/libsensor_msgs.so
+  )
+  ament_target_dependencies(gazebo_sensor_plugin_imu rclcpp gazebo_dev gazebo_ros )
+  ament_export_libraries(gazebo_sensor_plugin_imu)
+else()
+  add_library(gazebo_sensor_plugin_imu SHARED
+  src/gazebo_sensor_plugin_imu/gazebo_sensor_plugin_imu.cc
+  )
+  target_compile_definitions(gazebo_sensor_plugin_imu PRIVATE PX4_SITL=${PX4_SITL_SUPPORT})
+  target_link_libraries(gazebo_sensor_plugin_imu astrobee_gazebo)
+  ament_target_dependencies(gazebo_sensor_plugin_imu rclcpp gazebo_dev gazebo_ros)
+  ament_export_libraries(gazebo_sensor_plugin_imu)
+endif()
 
 # Create a sensor plugin for the handrail detection algorithm
 add_library(gazebo_sensor_plugin_handrail_detect SHARED
