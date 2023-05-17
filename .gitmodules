@@ -12,3 +12,6 @@
 	url = https://github.com/DISCOWER/astrobee_media.git
 	branch = ros2
 	shallow = true
+[submodule "external/PX4"]
+	path = external/PX4
+	url = git@github.com:DISCOWER/PX4-Space-Systems.git
