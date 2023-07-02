@@ -38,7 +38,7 @@ def generate_launch_description():
         launch_arg("mlp",     default_value="local", description="MLP IP address"),
         launch_arg("rec",     default_value="",      description="Record local data "),
         launch_arg("dds",     default_value="true",  description="Enable DDS"),
-        launch_arg("gtloc",   default_value="false", description="Use Ground Truth Localizer"),
+        launch_arg("gtloc",   default_value="true", description="Use Ground Truth Localizer"),
         launch_arg("perch",   default_value="false", description="Start in the perch position"),
         # General options
         launch_arg("gviz",   default_value="false",  description="Start GNC visualizer"),
@@ -54,7 +54,7 @@ def generate_launch_description():
         launch_arg("sdebug", default_value="false",  description="Debug simulator "),
         launch_arg("stats",  default_value="false",  description="Message statistics"),
         # Debug-specific options
-        launch_arg("default_robot", default_value="true", description="Insert default robot "),
+        launch_arg("default_robot", default_value="false", description="Insert default robot "),
         # Default starting pose based on scenario
         # Perch mode assumes ISS world
         launch_arg("pose", default_value="9.92 -9.54 4.50 0 0 0",
@@ -64,12 +64,14 @@ def generate_launch_description():
                            condition=LaunchConfigurationEquals("world", "iss")),
         launch_arg("pose", default_value="0 0 -0.7 0 0 0",
                            condition=LaunchConfigurationEquals("world", "granite")),
+        launch_arg("pose", default_value="1 1 0.7 3.14 0 0",
+                           condition=LaunchConfigurationEquals("world", "discower")),
         # Multi-robot simulation
-        launch_arg("honey", default_value="false", description="Insert honey robot"),
-        launch_arg("bumble", default_value="false", description="Insert bumble robot"),
+        launch_arg("honey", default_value="true", description="Insert honey robot"),
+        launch_arg("bumble", default_value="true", description="Insert bumble robot"),
         launch_arg("queen", default_value="false", description="Insert queen robot"),
-        launch_arg("honey_pose",  default_value="11 -7 4.8 0 0 0",  description="Overwrite honey's pose"),
-        launch_arg("bumble_pose", default_value="11 -4 4.8 0 0 0",  description="Overwrite bumble's pose"),
+        launch_arg("honey_pose",  default_value="1 1 0.7 3.14 0 0",  description="Overwrite honey's pose"),
+        launch_arg("bumble_pose", default_value="1 2 0.7 3.14 0 0",  description="Overwrite bumble's pose"),
         launch_arg("queen_pose",  default_value="11 -10 4.8 0 0 0", description="Use to overwrite queen's pose"),
         # Make sure all environment variables are set for controller
         # Override the robot and world environment variables all the time. The
