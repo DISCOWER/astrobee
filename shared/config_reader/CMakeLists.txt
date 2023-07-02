@@ -44,6 +44,7 @@ include_directories(
   include
   ${rclcpp_INCLUDE_DIRS}
   ${LUAJIT_INCLUDE_DIR}
+  ${ff_common_INCLUDE_DIR}
 )
 
 # Declare C++ libraries
