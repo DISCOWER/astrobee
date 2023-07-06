@@ -12,7 +12,6 @@ RUN mkdir /src && mkdir /src/astrobee
 
 
 # installing opencv4
-
 RUN apt-get purge -y libopencv*
 
 RUN cd /home
@@ -46,9 +45,15 @@ RUN cmake -D CMAKE_BUILD_TYPE=RELEASE \
     -D OPENCV_EXTRA_MODULES_PATH=../../opencv_contrib-4.2.0/modules \
     -D BUILD_EXAMPLES=ON ..
 
-
 RUN make -j4
 RUN sudo make install
 
-
 RUN export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/opencv/opencv-4.2.0/build/lib
+
+# zsh
+RUN sh -c "$(wget -O- https://github.com/deluan/zsh-in-docker/releases/download/v1.1.5/zsh-in-docker.sh)" -- \
+    -t robbyrussell
+RUN echo source /opt/ros/rolling/setup.zsh >> /root/.zshrc
+RUN echo source /src/astrobee/install/setup.zsh >> /root/.zshrc
+CMD [ "zsh" ]
+ENV MAKEFLAGS="-j4"
