@@ -20,12 +20,14 @@ First, clone the flight software repository and media:
     git clone https://github.com/nasa/astrobee.git $ASTROBEE_WS/src
     pushd $ASTROBEE_WS/src
     git submodule update --init --depth 1 description/media
+    git submodule update --init --depth 1 discower
     popd
 
 If you are planning to work with guest science code, you will also need the
 `astrobee_android` repository. You should checkout the repository as a submodule:
 
     git submodule update --init --depth 1 submodules/android
+    git submodule update --init --depth 1 discower
 
 ### Dependencies
 
