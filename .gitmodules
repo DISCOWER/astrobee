@@ -10,6 +10,3 @@
 [submodule "description/media"]
 	path = description/media
 	url = git@github.com:NASA/astrobee_media.git
-[submodule "discower"]
-	path = discower
-	url = git@github.com:DISCOWER/discower_asim.git
