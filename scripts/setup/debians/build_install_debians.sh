@@ -39,7 +39,7 @@ case $dist in
   jammy)
     build_list+=( opencv )
     sudo apt-get install -y libvtk7.1p
-    echo "Ubuntu 21 detected"
+    echo "Ubuntu 22 detected"
     ;;
   bionic)
     echo "Ubuntu 18 detected"

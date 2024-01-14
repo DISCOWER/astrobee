@@ -1,3 +1,8 @@
 ros-humble-ros-testing
 ros-humble-xacro
 ros-humble-perception-pcl
+libdc1394-dev
+libgtk-3-dev 
+libv4l-dev 
+libvtk7-dev 
+dh-python
