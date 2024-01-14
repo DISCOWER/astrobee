@@ -14,3 +14,6 @@
 	path = discower
 	url = git@github.com:DISCOWER/discower_asim.git
 	branch = main
+[submodule "submodules/px4"]
+	path = submodules/px4
+	url = git@github.com:DISCOWER/PX4-Space-Systems.git
