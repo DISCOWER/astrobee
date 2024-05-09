@@ -151,12 +151,6 @@ class SpawnEntityNode(Node):
         )
         parser.add_argument("-pose", nargs="+", type=str, help="initial pose as a list")
 
-        # TODO(shivesh): Wait for /set_model_configuration
-        # (https://github.com/ros-simulation/gazebo_ros_pkgs/issues/779)
-        # parser.add_argument('-J', dest='joints', default=[], action='append',
-        #     metavar=('JOINT_NAME', 'JOINT_POSITION'), type=str, nargs=2,
-        #     help='initialize the specified joint at the specified position')
-
         parser.add_argument(
             "-package_to_model",
             action="store_true",
@@ -172,12 +166,6 @@ class SpawnEntityNode(Node):
                              and delete the entity when this program is interrupted",
         )
         self.args = parser.parse_args(args[1:])
-
-        # TODO(shivesh): Wait for /set_model_configuration
-        # (https://github.com/ros-simulation/gazebo_ros_pkgs/issues/779)
-        # Convert position of joints to floats
-        # for i in range(len(self.args.joints)):
-        #     self.args.joints[i][1] = float(self.args.joints[i][1])
 
     def run(self):
         """
@@ -291,7 +279,6 @@ class SpawnEntityNode(Node):
         # Form requested Pose from arguments
         initial_pose = Pose()
         if hasattr(self.args, "pose"):
-            print(self.args.pose)
             pose = self.args.pose[0].split(" ")
 
             initial_pose.position.x = float(pose[0])
@@ -320,17 +307,6 @@ class SpawnEntityNode(Node):
         if not success:
             self.get_logger().error("Spawn service failed. Exiting.")
             return 1
-
-        # TODO(shivesh): Wait for /set_model_configuration
-        # (https://github.com/ros-simulation/gazebo_ros_pkgs/issues/779)
-        # Apply joint positions if any specified
-        # if len(self.args.joints) != 0:
-        #     joint_names = [joint[0] for joint in self.args.joints]
-        #     joint_positions = [joint[1] for joint in self.args.joints]
-        #     success = _set_model_configuration(joint_names, joint_positions)
-        #     if not success:
-        #         self.get_logger().error('SetModelConfiguration service failed. Exiting.')
-        #         return 1
 
         # Unpause physics if user requested
         if self.args.unpause:
@@ -425,30 +401,6 @@ class SpawnEntityNode(Node):
                 "Service %s/delete_entity unavailable. "
                 + "Was Gazebo started with GazeboRosFactory?"
             )
-
-    # def _set_model_configuration(self, joint_names, joint_positions):
-    #     self.get_logger().info(
-    #         'Waiting for service %s/set_model_configuration' % self.args.gazebo_namespace)
-    #     client = self.create_client(SetModelConfiguration, 'set_model_configuration')
-    #     if client.wait_for_service(timeout_sec=5.0):
-    #         req = SetModelConfiguration.Request()
-    #         req.model_name = self.args.entity
-    #         req.urdf_param_name = ''
-    #         req.joint_names = joint_names
-    #         req.joint_positions = joint_positions
-    #         self.get_logger().info(
-    #             'Calling service %s/set_model_configuration' % self.args.gazebo_namespace)
-    #         srv_call = client.call_async(req)
-    #         while rclpy.ok():
-    #             if srv_call.done():
-    #                 self.get_logger().info(
-    #                     'Set model configuration status: %s' % srv_call.result().status_message)
-    #                 break
-    #             rclpy.spin_once(self)
-    #         return srv_call.result().success
-    #     self.get_logger().error('Service %s/set_model_configuration unavailable. \
-    #                              Was Gazebo started with GazeboRosState?')
-    #     return False
 
 
 def quaternion_from_euler(roll, pitch, yaw):
