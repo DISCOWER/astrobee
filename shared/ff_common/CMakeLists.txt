@@ -39,6 +39,7 @@ include_directories(
   include
   ${rclcpp_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIR}
+  ${ff_common_INCLUDE_DIRS}
 )
 
 # Declare C++ libraries
